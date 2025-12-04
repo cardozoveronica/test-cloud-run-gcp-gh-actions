@@ -1,0 +1,109 @@
+name: Build and Deploy to Cloud Run.
+
+on:
+  workflow_call:
+    secrets:
+      GOOGLE_CLOUD_PROJECT:
+        required: false
+      SENTRY_DSN:
+        required: false
+    inputs:
+      memory_size:
+        default: 1Gi
+        type: string
+      max_instances:
+        default: 1
+        type: string
+      min_instances:
+        default: 0
+        type: string
+      service_account:
+        required: true
+        type: string
+      branch_name:
+        default: main
+        required: true
+        type: string
+      env:
+        required: true
+        type: string
+      envUrl:
+        required: false
+        type: string
+      frontend_base_path:
+        required: false
+        type: string
+      backend_base_path:
+        required: false
+        type: string
+      deployment_name:
+        required: true
+        type: string
+      entrypoint_cmd:
+        required: true
+        type: string
+
+env:
+  PROJECT_ID: ${{ secrets.GOOGLE_CLOUD_PROJECT }}
+  GOOGLE_CLOUD_LOCATION: us-central1
+  IMAGE_NAME: lending-portal-backend_${{ github.run_id }}
+  GCR_REGISTRY: us-central1-docker.pkg.dev
+  GCR_REPOSITORY: plannery-poc/plannery-docker
+  K8S_NAMESPACE: lending-portal-staging
+
+jobs:
+  deploy:
+    name: Deploy Cloud Run
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    steps:
+      - name: Log workflow inputs
+        run: |
+          echo "branch_name=${{ inputs.branch_name }}"
+          echo "env=${{ inputs.env }}"
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set environment variables
+        run: |
+          echo "REVISION=${{ inputs.branch_name }}" >> $GITHUB_ENV
+          echo "GIT_HASH=$(git rev-parse --short "$GITHUB_SHA")" >> $GITHUB_ENV
+          echo "IMAGE=$GCR_REGISTRY/$GCR_REPOSITORY/$IMAGE_NAME:${{ inputs.branch_name }}" >> $GITHUB_ENV
+
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          token_format: 'access_token'
+          workload_identity_provider: '#projects/881220405358/locations/global/workloadIdentityPools/github-workload-identity-pool/providers/github-provider'
+          service_account: '#deploy@plannery-poc.iam.gserviceaccount.com'
+
+      - id: deployToCloudRun
+        name: Deploy to Cloud Run
+        run: |
+          gcloud beta run deploy ${{ inputs.deployment_name }}-${{ inputs.env }} \
+            --image=$IMAGE \
+            --cpu=2 \
+            --memory=${{ inputs.memory_size }} \
+            --max-instances=${{ inputs.max_instances }} \
+            --min-instances=${{ inputs.min_instances }} \
+            --ingress=internal-and-cloud-load-balancing \
+            --port=8080 \
+            --service-account=${{ inputs.service_account }} \
+            --tag=$REVISION \
+            --timeout=1m40s \
+            --env-vars-file=env/${{ inputs.env }}/env.yml \
+            --allow-unauthenticated \
+            --cpu-boost \
+            --cpu-throttling \
+            --revision-suffix=$REVISION-$GIT_HASH \
+            --region=$GOOGLE_CLOUD_LOCATION \
+            --no-use-http2 \
+            --execution-environment=gen2 \
+            --vpc-connector cloud-run-vpc \
+            --vpc-egress=all-traffic \
+            --concurrency=250 \
+            --command="${{ inputs.entrypoint_cmd }}"
