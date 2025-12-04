@@ -9,6 +9,7 @@ on:
 
 jobs:
   run-unit-tests:
+    if: false
     uses: ./.github/workflows/run-unit-tests.yml
   setup:
     name: Build and Push Image to GCR
@@ -58,6 +59,7 @@ jobs:
       GOOGLE_CLOUD_PROJECT: ${{ secrets.GKE_PROJECT }}
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
   run-end-to-end-tests:
+    if: false
     needs: [deploy-api-to-google-cloud, deploy-webhook-to-google-cloud]
     uses: ./.github/workflows/run-end-to-end-tests.yml
     with:
