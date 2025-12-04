@@ -7,32 +7,16 @@ env:
   NODE_VERSION: 22
 
 jobs:
-  run-unit-tests:
-    name: Run unit tests
+# El nombre del job
+  do_nothing:
+    # El sistema operativo donde se ejecutará (puedes usar 'ubuntu-latest', 'windows-latest', etc.)
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-
+    
+    # Los pasos (steps) que componen el job
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - uses: actions/setup-node@v3
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Cache node_modules
-        uses: actions/cache@v4
-        id: cache-node_modules
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-${{ env.NODE_VERSION }}-node_modules-${{ hashFiles('**/package-lock.json') }}
-
-      - name: Install dependencies
-        if: steps.cache-node_modules.outputs.cache-hit != 'true'
-        run: npm ci
-
-      - name: Run Unit Tests
-        run: npm test
+      # Un paso simple para mostrar un mensaje
+      - name: Just print a message
+        run: |
+          echo "Este workflow de prueba se ha ejecutado."
+          echo "Razón: ${{ github.event.inputs.reason }}"
+          echo "Hora: $(date)"
