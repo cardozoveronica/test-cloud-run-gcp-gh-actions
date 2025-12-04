@@ -1,0 +1,286 @@
+name: Run end to end tests
+
+on:
+  workflow_call:
+    secrets:
+      PLANNERY_QA_GITHUB_PERSONAL_ACCESS_TOKEN:
+        required: true
+    inputs:
+      frontendTarget:
+        required: true
+        type: string
+      backendTarget:
+        required: true
+        type: string
+      description:
+        required: true
+        type: string
+
+env:
+  NODE_VERSION: 18.x
+
+jobs:
+  test-setup:
+    name: Setup E2E tests
+    runs-on: ubuntu-latest
+    outputs:
+      total: ${{ steps.set-count.outputs.total }}
+      names: ${{ steps.get-names.outputs.names }}
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          repository: 'Plannery/Plannery-Lending-Portal-Quality-Assurance'
+          fetch-depth: 0
+          # GitHub Personal access tokens (PAT) is used to access the GitHub API and checkout the Plannery-Lending-Portal-Quality-Assurance repository
+          token: ${{ secrets.PLANNERY_QA_GITHUB_PERSONAL_ACCESS_TOKEN }}
+
+      - name: Add Branch name from description arguments
+        run: |
+          import os, re
+          args = {
+            'HEADLESS': 'true',
+            'CHROME': 'enabled',
+            'FIREFOX': 'disabled',
+            'SAFARI': 'disabled',
+            'FRONTEND_TARGET': os.environ['FRONTEND_TARGET'],
+            'BACKEND_TARGET': os.environ['BACKEND_TARGET'],
+            'QA_TARGET': '${{ github.head_ref }}',
+          }
+          args_from_description = re.findall(r"End to end testing parameters.*`(.*)`", """${{ github.event.pull_request.body }}""")
+          if args_from_description:
+            for arg in args_from_description[0].split(';'):
+              args.update({k: v for k, v in [arg.split('=')]})
+          print(f"Testing branch args: {args}")
+          with open(".env", "a") as env_file:
+            for k, v in args.items():
+              env_file.write(f"{k}={v}\n")
+        env:
+          BODY: ${{ inputs.description }}
+          FRONTEND_TARGET: ${{ inputs.frontendTarget }}
+          BACKEND_TARGET: ${{ inputs.backendTarget }}
+        shell: python
+
+      - name: Change to branch
+        run: |
+          export $(grep -v '^#' .env | xargs);
+          git checkout $QA_TARGET;
+
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          token_format: 'id_token'
+          workload_identity_provider: 'projects/881220405358/locations/global/workloadIdentityPools/github-workload-identity-pool/providers/github-provider'
+          service_account: 'deploy@plannery-poc.iam.gserviceaccount.com'
+          id_token_audience: 881220405358-tndubivqj6iglk75tmi2ibcgd5k42kld.apps.googleusercontent.com # required, value depends on target
+          id_token_include_email: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Get installed Playwright version
+        id: playwright-version
+        run: echo "PLAYWRIGHT_VERSION=$(node -e "console.log(require('./package-lock.json').dependencies['@playwright/test'].version)")" >> $GITHUB_ENV
+
+      - name: Cache playwright binaries
+        uses: actions/cache@v3
+        id: playwright-cache
+        with:
+          path: |
+            ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
+
+      - name: Cache node_modules
+        uses: actions/cache@v3
+        id: cache-node_modules
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-${{ env.NODE_VERSION }}-node_modules-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install dependencies
+        if: steps.cache-node_modules.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+
+      - name: Set env variables
+        run: |
+          echo -e "ID_TOKEN=${{ steps.auth.outputs.id_token }}" >> .env
+
+      - name: Count Total Tests
+        id: set-count
+        run: |
+          # Get total number of tests
+          TOTAL=$(npx playwright test --list --grep-invert "@skip|@disabled|@ignore" | grep "^  " | wc -l)
+          echo "total=${TOTAL}" >> $GITHUB_OUTPUT
+
+      - name: Get Tests Names
+        id: get-names
+        run: |
+          # Get the names of the tests
+          NAMES=$(npx playwright test --list --grep-invert "@skip|@disabled|@ignore" --reporter=json | jq -c '[null] + [.suites[].specs[].title]')
+          echo "names=${NAMES}" >> $GITHUB_OUTPUT
+
+      - name: Generate Test Matrix
+        id: set-matrix
+        run: |
+          TOTAL=${{ steps.set-count.outputs.total }}
+          MATRIX=$(seq 1 $TOTAL | jq -R -s -c 'split("\n")[:-1] | map(tonumber)')
+          echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
+
+  test-run:
+    name: 'Test: ${{ fromJson(needs.test-setup.outputs.names)[matrix.index] }}'
+    needs: [test-setup]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        index: ${{ fromJson(needs.test-setup.outputs.matrix) }}
+        total: ['${{ needs.test-setup.outputs.total }}']
+
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: 'Plannery/Plannery-Lending-Portal-Quality-Assurance'
+          fetch-depth: 0
+          # GitHub Personal access tokens (PAT) is used to access the GitHub API and checkout the Plannery-Lending-Portal-Quality-Assurance repository
+          token: ${{ secrets.PLANNERY_QA_GITHUB_PERSONAL_ACCESS_TOKEN }}
+
+      - name: Add Branch name from description arguments
+        run: |
+          import os, re
+          args = {
+            'HEADLESS': 'true',
+            'CHROME': 'disabled',
+            'FIREFOX': 'disabled',
+            'SAFARI': 'enabled',
+            'FRONTEND_TARGET': os.environ['FRONTEND_TARGET'],
+            'BACKEND_TARGET': os.environ['BACKEND_TARGET'],
+            'QA_TARGET': 'main',
+          }
+          args_from_description = re.findall(r"End to end testing parameters.*`(.*)`", """${{ github.event.pull_request.body }}""")
+          if args_from_description:
+            for arg in args_from_description[0].split(';'):
+              args.update({k: v for k, v in [arg.split('=')]})
+          print(f"Testing branch args: {args}")
+          with open(".env", "a") as env_file:
+            for k, v in args.items():
+              env_file.write(f"{k}={v}\n")
+        env:
+          BODY: ${{ inputs.description }}
+          FRONTEND_TARGET: ${{ inputs.frontendTarget }}
+          BACKEND_TARGET: ${{ inputs.backendTarget }}
+        shell: python
+
+      - name: Change to branch
+        run: |
+          export $(grep -v '^#' .env | xargs);
+          git checkout $QA_TARGET;
+
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          token_format: 'id_token'
+          workload_identity_provider: 'projects/881220405358/locations/global/workloadIdentityPools/github-workload-identity-pool/providers/github-provider'
+          service_account: 'deploy@plannery-poc.iam.gserviceaccount.com'
+          id_token_audience: 881220405358-tndubivqj6iglk75tmi2ibcgd5k42kld.apps.googleusercontent.com # required, value depends on target
+          id_token_include_email: true
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Get installed Playwright version
+        id: playwright-version
+        run: echo "PLAYWRIGHT_VERSION=$(node -e "console.log(require('./package-lock.json').dependencies['@playwright/test'].version)")" >> $GITHUB_ENV
+
+      - name: Cache playwright binaries
+        uses: actions/cache@v3
+        id: playwright-cache
+        with:
+          path: |
+            ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
+
+      - name: Cache node_modules
+        uses: actions/cache@v3
+        id: cache-node_modules
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-${{ env.NODE_VERSION }}-node_modules-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install dependencies
+        if: steps.cache-node_modules.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+
+      - name: Set env variables
+        run: |
+          echo -e "ID_TOKEN=${{ steps.auth.outputs.id_token }}" >> .env
+
+      - name: Run Playwright tests
+        run: npx playwright test --shard=${{ matrix.index }}/${{ matrix.total }}
+
+      - name: Upload Blob Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: blob-report-${{ matrix.index }}
+          path: blob-report
+          retention-days: 1
+
+  merge-reports:
+    name: Generate HTML Report
+    if: always()
+    needs: [test-run]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Download Blob Reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: blob-report-*
+          path: all-blob-reports
+          merge-multiple: true
+
+      - name: Merge Reports
+        run: npx playwright merge-reports --reporter html ./all-blob-reports
+
+      - name: Upload HTML Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-${{ github.event.pull_request.number }}-report-attempt-${{ github.run_attempt }}
+          path: playwright-report
+          retention-days: 15
