@@ -1,0 +1,68 @@
+name: Deploy main to staging
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  run-unit-tests:
+    uses: ./.github/workflows/run-unit-tests.yml
+  setup:
+    name: Build and Push Image to GCR
+    uses: ./.github/workflows/build-and-push.yml
+    with:
+      branch_name: ${{github.head_ref||'main'}}
+      env: staging
+      envUrl: "https://main.staging.planneryapp.com?apiRevision=${{github.head_ref||'main'}}"
+      frontend_base_path: "https://main.staging.planneryapp.com?apiRevision=${{github.head_ref||'main'}}"
+      backend_base_path: "https://api.staging.planneryapp.com/backend-staging/${{github.head_ref||'main'}}"
+      service_account: lending-portal-backend-s@plannery-poc.iam.gserviceaccount.com
+    secrets:
+      GOOGLE_CLOUD_PROJECT: ${{ secrets.GKE_PROJECT }}
+      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+  deploy-api-to-google-cloud:
+    uses: ./.github/workflows/cloud-run.yml
+    needs: [setup]
+    with:
+      branch_name: ${{github.head_ref||'main'}}
+      env: staging
+      envUrl: "https://main.staging.planneryapp.com?apiRevision=${{github.head_ref||'main'}}"
+      frontend_base_path: "https://main.staging.planneryapp.com?apiRevision=${{github.head_ref||'main'}}"
+      backend_base_path: "https://api.staging.planneryapp.com/backend-staging/${{github.head_ref||'main'}}"
+      service_account: lending-portal-backend-s@plannery-poc.iam.gserviceaccount.com
+      max_instances: 1
+      min_instances: 0
+      deployment_name: backend
+      entrypoint_cmd: npm,run,prod,runApi
+    secrets:
+      GOOGLE_CLOUD_PROJECT: ${{ secrets.GKE_PROJECT }}
+      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+  deploy-webhook-to-google-cloud:
+    uses: ./.github/workflows/cloud-run.yml
+    needs: [setup]
+    with:
+      branch_name: ${{github.head_ref||'main'}}
+      env: staging
+      envUrl: "https://main.staging.planneryapp.com?apiRevision=${{github.head_ref||'main'}}"
+      frontend_base_path: "https://main.staging.planneryapp.com?apiRevision=${{github.head_ref||'main'}}"
+      backend_base_path: "https://api.staging.planneryapp.com/backend-staging/${{github.head_ref||'main'}}"
+      service_account: lending-portal-backend-s@plannery-poc.iam.gserviceaccount.com
+      max_instances: 3
+      min_instances: 0
+      deployment_name: backend-webhook
+      entrypoint_cmd: npm,run,prod,runWebhook
+    secrets:
+      GOOGLE_CLOUD_PROJECT: ${{ secrets.GKE_PROJECT }}
+      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+  run-end-to-end-tests:
+    needs: [deploy-api-to-google-cloud, deploy-webhook-to-google-cloud]
+    uses: ./.github/workflows/run-end-to-end-tests.yml
+    with:
+      frontendTarget: main
+      backendTarget: "${{github.head_ref||'main'}}"
+      description: ${{ github.event.pull_request.body }}
+    secrets:
+      PLANNERY_QA_GITHUB_PERSONAL_ACCESS_TOKEN: ${{ secrets.PLANNERY_QA_GITHUB_PERSONAL_ACCESS_TOKEN }}
