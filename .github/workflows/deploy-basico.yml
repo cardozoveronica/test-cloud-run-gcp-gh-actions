@@ -1,0 +1,28 @@
+name: Deploy to Google Cloud
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate with Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: "projects/684861862054/locations/global/workloadIdentityPools/github-workload-identity-pool/providers/github-provider"
+          service_account: "sa-github-deploy@esoteric-might-479911-j7.iam.gserviceaccount.com"
+
+      - name: Test gcloud access
+        run: gcloud auth print-access-token
