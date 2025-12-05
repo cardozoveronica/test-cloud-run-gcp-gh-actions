@@ -7,6 +7,9 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+permissions:
+  id-token: write
+
 jobs:
   run-unit-tests:
     if: false
@@ -14,7 +17,6 @@ jobs:
   setup:
     name: Build and Push Image to GCR
     uses: ./.github/workflows/build-and-push.yml
-    id-token: write 
     with:
       branch_name: ${{github.head_ref||'main'}}
       env: staging
