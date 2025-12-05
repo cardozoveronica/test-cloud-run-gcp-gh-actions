@@ -14,14 +14,15 @@ jobs:
   setup:
     name: Build and Push Image to GCR
     uses: ./.github/workflows/build-and-push.yml
+    id-token: write 
     with:
       branch_name: ${{github.head_ref||'main'}}
       env: staging
-      id-token: write 
       #envUrl: "https://main.staging.planapp.com?apiRevision=${{github.head_ref||'main'}}"
       #frontend_base_path: "https://main.staging.planapp.com?apiRevision=${{github.head_ref||'main'}}"
       #backend_base_path: "https://api.staging.planapp.com/backend-staging/${{github.head_ref||'main'}}"
       #service_account: lending-portal-backend-s@plan-poc.iam.gserviceaccount.com
+      service_account: sa-github-deploy@esoteric-might-479911-j7.iam.gserviceaccount.com
     secrets:
       GOOGLE_CLOUD_PROJECT: ${{ secrets.GKE_PROJECT }}
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
