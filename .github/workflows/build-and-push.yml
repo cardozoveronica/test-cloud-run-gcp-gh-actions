@@ -33,7 +33,7 @@ env:
   GOOGLE_CLOUD_LOCATION: us-central1
   IMAGE_NAME: lending-portal-backend_${{ github.run_id }}
   GCR_REGISTRY: us-central1-docker.pkg.dev
-  GCR_REPOSITORY: plannery-poc/plannery-docker
+  GCR_REPOSITORY: esoteric-might-479911-j7/test-cloud-run-gcp-gh-actions
   K8S_NAMESPACE: lending-portal-staging
 
 jobs:
