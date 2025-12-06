@@ -90,8 +90,8 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            SENTRY_DSN=${{ secrets.SENTRY_DSN }} 
-            FRONTEND_BASE_PATH=${{ inputs.frontend_base_path }} 
-            BACKEND_BASE_PATH=${{ inputs.backend_base_path }} 
+#            SENTRY_DSN=${{ secrets.SENTRY_DSN }} 
+#            FRONTEND_BASE_PATH=${{ inputs.frontend_base_path }} 
+#            BACKEND_BASE_PATH=${{ inputs.backend_base_path }} 
             ENVIRONMENT=${{ inputs.env }} 
             PORT=8080 .
