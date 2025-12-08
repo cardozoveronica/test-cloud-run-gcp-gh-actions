@@ -35,10 +35,11 @@ jobs:
     with:
       branch_name: ${{github.head_ref||'main'}}
       env: staging
-      envUrl: "https://main.staging.planapp.com?apiRevision=${{github.head_ref||'main'}}"
-      frontend_base_path: "https://main.staging.planapp.com?apiRevision=${{github.head_ref||'main'}}"
-      backend_base_path: "https://api.staging.planapp.com/backend-staging/${{github.head_ref||'main'}}"
-      service_account: lending-portal-backend-s@plan-poc.iam.gserviceaccount.com
+      #envUrl: "https://main.staging.planapp.com?apiRevision=${{github.head_ref||'main'}}"
+      #frontend_base_path: "https://main.staging.planapp.com?apiRevision=${{github.head_ref||'main'}}"
+      #backend_base_path: "https://api.staging.planapp.com/backend-staging/${{github.head_ref||'main'}}"
+      #service_account: lending-portal-backend-s@plan-poc.iam.gserviceaccount.com
+      service_account: sa-github-deploy@esoteric-might-479911-j7.iam.gserviceaccount.com
       max_instances: 1
       min_instances: 0
       deployment_name: backend
@@ -52,10 +53,11 @@ jobs:
     with:
       branch_name: ${{github.head_ref||'main'}}
       env: staging
-      envUrl: "https://main.staging.planapp.com?apiRevision=${{github.head_ref||'main'}}"
-      frontend_base_path: "https://main.staging.planapp.com?apiRevision=${{github.head_ref||'main'}}"
-      backend_base_path: "https://api.staging.planapp.com/backend-staging/${{github.head_ref||'main'}}"
-      service_account: lending-portal-backend-s@plan-poc.iam.gserviceaccount.com
+      #envUrl: "https://main.staging.planapp.com?apiRevision=${{github.head_ref||'main'}}"
+      #frontend_base_path: "https://main.staging.planapp.com?apiRevision=${{github.head_ref||'main'}}"
+      #backend_base_path: "https://api.staging.planapp.com/backend-staging/${{github.head_ref||'main'}}"
+      #service_account: lending-portal-backend-s@plan-poc.iam.gserviceaccount.com
+      service_account: sa-github-deploy@esoteric-might-479911-j7.iam.gserviceaccount.com
       max_instances: 3
       min_instances: 0
       deployment_name: backend-webhook
