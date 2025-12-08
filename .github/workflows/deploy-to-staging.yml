@@ -3,7 +3,7 @@ name: Deploy main to staging
 on:
   push:
     branches:
-      - main
+      - staging
   pull_request:
     types: [opened, synchronize, reopened]
 
