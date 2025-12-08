@@ -34,7 +34,7 @@ env:
   IMAGE_NAME: lending-portal-backend_${{ github.run_id }}
   GCR_REGISTRY: us-central1-docker.pkg.dev
   GCR_REPOSITORY: esoteric-might-479911-j7/test-cloud-run-gcp-gh-actions
-  K8S_NAMESPACE: lendding-portal-staging
+  K8S_NAMESPACE: lending-portal-staging
 
 jobs:
   setup:
