@@ -9,7 +9,7 @@ on:
         required: false
     inputs:
       memory_size:
-        default: 1Gi
+        default: 0.5Gi
         type: string
       max_instances:
         default: 1
@@ -44,7 +44,7 @@ on:
         type: string
 
 env:
-  PROJECT_ID: ${{ secrets.GOOGLE_CLOUD_PROJECT }}
+  PROJECT_ID: ${{ secrets.GKE_PROJECT }}
   GOOGLE_CLOUD_LOCATION: us-central1
   IMAGE_NAME: lending-portal-backend_${{ github.run_id }}
   GCR_REGISTRY: us-central1-docker.pkg.dev
