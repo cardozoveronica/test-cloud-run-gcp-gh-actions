@@ -16,7 +16,7 @@ jobs:
     if: false
     uses: ./.github/workflows/run-unit-tests.yml
   setup:
-    name: Build and Push Image to GCR
+    name: Build and Pussh Image to GCR
     uses: ./.github/workflows/build-and-push.yml
     with:
       branch_name: ${{github.head_ref||'main'}}
