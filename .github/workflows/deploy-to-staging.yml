@@ -69,9 +69,3 @@ jobs:
     if: false
     needs: [deploy-api-to-google-cloud, deploy-webhook-to-google-cloud]
     uses: ./.github/workflows/run-end-to-end-tests.yml
-    with:
-      frontendTarget: main
-      backendTarget: "${{github.head_ref||'main'}}"
-      description: ${{ github.event.pull_request.body }}
-    secrets:
-      PLANNERY_QA_GITHUB_PERSONAL_ACCESS_TOKEN: ${{ secrets.PLANNERY_QA_GITHUB_PERSONAL_ACCESS_TOKEN }}
