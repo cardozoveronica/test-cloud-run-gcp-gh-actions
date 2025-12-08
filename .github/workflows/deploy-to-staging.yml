@@ -42,7 +42,6 @@ jobs:
       max_instances: 1
       min_instances: 0
       deployment_name: backend
-      entrypoint_cmd: npm,run,prod,runApi
     secrets:
       GOOGLE_CLOUD_PROJECT: ${{ secrets.GKE_PROJECT }}
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
