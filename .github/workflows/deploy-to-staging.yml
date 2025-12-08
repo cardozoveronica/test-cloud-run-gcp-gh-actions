@@ -60,7 +60,7 @@ jobs:
       max_instances: 3
       min_instances: 0
       deployment_name: backend-webhook
-      entrypoint_cmd: npm,run,prod,runWebhook
+      entrypoint_cmd: "" 
     secrets:
       GOOGLE_CLOUD_PROJECT: ${{ secrets.GKE_PROJECT }}
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
