@@ -87,7 +87,7 @@ jobs:
           context: .
           file: ./Dockerfile.prod
           push: true
-	  tags: '${{ env.IMAGE }}' 
+          tags: '${{ env.IMAGE }}'
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
