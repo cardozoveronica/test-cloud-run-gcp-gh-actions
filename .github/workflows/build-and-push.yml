@@ -61,6 +61,11 @@ jobs:
         run: |
           echo "IMAGE=$GCR_REGISTRY/$GCR_REPOSITORY/$IMAGE_NAME:${{ inputs.branch_name }}" >> $GITHUB_ENV
 
+      - name: Check variables
+        run: |
+          echo 'IMAGEN: ${{ env.IMAGE }}'
+          echo 'ENV GITHUB: ${{ env.GITHUB_ENV }}'
+
       - id: 'auth'
         name: 'Authenticate to Google Cloud'
         uses: 'google-github-actions/auth@v2'
