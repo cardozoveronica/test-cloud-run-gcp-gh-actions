@@ -90,8 +90,7 @@ jobs:
           context: .
           file: ./Dockerfile.prod
           push: true
-          tags: ${{ env.GCR_REGISTRY }}/${{ env.GCR_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.run_id }},
-                ${{ env.GCR_REGISTRY }}/${{ env.GCR_REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
+          tags: '${{ env.IMAGE }}'
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
