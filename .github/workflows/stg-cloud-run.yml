@@ -22,6 +22,16 @@ on:
         default: main
         required: true
         type: string
+      project_id:
+        required: true
+        type: string
+      workload_identity_provider:
+        required: true
+        type: string
+      registry_repo_name:
+        required: true
+        type: string
+
       env:
         required: true
         type: string
@@ -38,12 +48,6 @@ on:
         required: true
         type: string
       entrypoint_cmd:
-        required: true
-        type: string
-      project_id:
-        required: true
-        type: string
-      workload_identity_provider:
         required: true
         type: string
 
