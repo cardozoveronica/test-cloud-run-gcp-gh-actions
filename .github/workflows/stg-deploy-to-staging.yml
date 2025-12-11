@@ -1,4 +1,4 @@
-name: Deploy main to staging
+name: Deploy main to new staging env
 
 on:
   workflow_dispatch:
@@ -12,8 +12,8 @@ jobs:
     if: false
     uses: ./.github/workflows/run-unit-tests.yml
   setup:
-    name: Build and Pussh Image to GCR
-    uses: ./.github/workflows/build-and-push.yml
+    name: Build and Push Image to GCR
+    uses: ./.github/workflows/stg-build-and-push.yml
     with:
       branch_name: ${{github.head_ref||'main'}}
       env: staging
@@ -21,12 +21,12 @@ jobs:
       #frontend_base_path: "https://main.staging.planapp.com?apiRevision=${{github.head_ref||'main'}}"
       #backend_base_path: "https://api.staging.planapp.com/backend-staging/${{github.head_ref||'main'}}"
       #service_account: lending-portal-backend-s@plan-poc.iam.gserviceaccount.com
-      service_account: sa-github-deploy@esoteric-might-479911-j7.iam.gserviceaccount.com
+      service_account: ${{ vars.STG_SERVICE_ACCOUNT }}
     secrets:
-      GOOGLE_CLOUD_PROJECT: ${{ secrets.GKE_PROJECT }}
+      GOOGLE_CLOUD_PROJECT: ${{ secrets.STG_GKE_PROJECT }}
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
   deploy-api-to-google-cloud:
-    uses: ./.github/workflows/cloud-run.yml
+    uses: ./.github/workflows/stg-cloud-run.yml
     needs: [setup]
     with:
       branch_name: ${{github.head_ref||'main'}}
@@ -35,16 +35,16 @@ jobs:
       #frontend_base_path: "https://main.staging.planapp.com?apiRevision=${{github.head_ref||'main'}}"
       #backend_base_path: "https://api.staging.planapp.com/backend-staging/${{github.head_ref||'main'}}"
       #service_account: lending-portal-backend-s@plan-poc.iam.gserviceaccount.com
-      service_account: sa-github-deploy@esoteric-might-479911-j7.iam.gserviceaccount.com
+      service_account: ${{ vars.STG_SERVICE_ACCOUNT }}
       max_instances: 1
       min_instances: 0
       deployment_name: backend
       entrypoint_cmd: ""
     secrets:
-      GOOGLE_CLOUD_PROJECT: ${{ secrets.GKE_PROJECT }}
+      GOOGLE_CLOUD_PROJECT: ${{ secrets.STG_GKE_PROJECT }}
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
   deploy-webhook-to-google-cloud:
-    uses: ./.github/workflows/cloud-run.yml
+    uses: ./.github/workflows/stg-cloud-run.yml
     needs: [setup]
     with:
       branch_name: ${{github.head_ref||'main'}}
@@ -53,13 +53,13 @@ jobs:
       #frontend_base_path: "https://main.staging.planapp.com?apiRevision=${{github.head_ref||'main'}}"
       #backend_base_path: "https://api.staging.planapp.com/backend-staging/${{github.head_ref||'main'}}"
       #service_account: lending-portal-backend-s@plan-poc.iam.gserviceaccount.com
-      service_account: sa-github-deploy@esoteric-might-479911-j7.iam.gserviceaccount.com
+      service_account: ${{ vars.STG_SERVICE_ACCOUNT }}
       max_instances: 3
       min_instances: 0
       deployment_name: backend-webhook
       entrypoint_cmd: "" 
     secrets:
-      GOOGLE_CLOUD_PROJECT: ${{ secrets.GKE_PROJECT }}
+      GOOGLE_CLOUD_PROJECT: ${{ secrets.STG_GKE_PROJECT }}
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
   run-end-to-end-tests:
     if: false
