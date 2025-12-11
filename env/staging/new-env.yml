@@ -1,0 +1,3 @@
+CONTAINER_NAME: webapp
+LOG_DESTINATION: stackdriver
+REVISION: cloud-run

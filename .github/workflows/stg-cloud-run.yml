@@ -102,7 +102,7 @@ jobs:
             --service-account=${{ inputs.service_account }} \
             --tag=$REVISION \
             --timeout=1m40s \
-            --env-vars-file=env/${{ inputs.env }}/env.yml \
+            --env-vars-file=env/${{ inputs.env }}/new-env.yml \
             --allow-unauthenticated \
             --cpu-boost \
             --cpu-throttling \
