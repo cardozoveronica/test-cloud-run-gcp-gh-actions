@@ -22,8 +22,10 @@ jobs:
       #backend_base_path: "https://api.staging.planapp.com/backend-staging/${{github.head_ref||'main'}}"
       #service_account: lending-portal-backend-s@plan-poc.iam.gserviceaccount.com
       service_account: ${{ vars.STG_SERVICE_ACCOUNT }}
+      workload_identity_provider: ${{ vars.STG_W_IDENTITY_PROVIDER }}
+      project_id: ${{ vars.STG_PROJECT_ID }}
+      registry_repo_name: ${{ vars.STG_REGISTRY_REPO_NAME }}
     secrets:
-      GOOGLE_CLOUD_PROJECT: ${{ secrets.STG_GKE_PROJECT }}
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
   deploy-api-to-google-cloud:
     uses: ./.github/workflows/stg-cloud-run.yml
@@ -36,12 +38,14 @@ jobs:
       #backend_base_path: "https://api.staging.planapp.com/backend-staging/${{github.head_ref||'main'}}"
       #service_account: lending-portal-backend-s@plan-poc.iam.gserviceaccount.com
       service_account: ${{ vars.STG_SERVICE_ACCOUNT }}
+      workload_identity_provider: ${{ vars.STG_W_IDENTITY_PROVIDER }}
+      project_id: ${{ vars.STG_PROJECT_ID }}
+      registry_repo_name: ${{ vars.STG_REGISTRY_REPO_NAME }}
       max_instances: 1
       min_instances: 0
       deployment_name: backend
       entrypoint_cmd: ""
     secrets:
-      GOOGLE_CLOUD_PROJECT: ${{ secrets.STG_GKE_PROJECT }}
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
   deploy-webhook-to-google-cloud:
     uses: ./.github/workflows/stg-cloud-run.yml
@@ -54,12 +58,14 @@ jobs:
       #backend_base_path: "https://api.staging.planapp.com/backend-staging/${{github.head_ref||'main'}}"
       #service_account: lending-portal-backend-s@plan-poc.iam.gserviceaccount.com
       service_account: ${{ vars.STG_SERVICE_ACCOUNT }}
+      workload_identity_provider: ${{ vars.STG_W_IDENTITY_PROVIDER }}
+      project_id: ${{ vars.STG_PROJECT_ID }}
+      registry_repo_name: ${{ vars.STG_REGISTRY_REPO_NAME }}
       max_instances: 3
       min_instances: 0
       deployment_name: backend-webhook
       entrypoint_cmd: "" 
     secrets:
-      GOOGLE_CLOUD_PROJECT: ${{ secrets.STG_GKE_PROJECT }}
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
   run-end-to-end-tests:
     if: false
