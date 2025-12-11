@@ -23,10 +23,10 @@ jobs:
       #service_account: lending-portal-backend-s@plan-poc.iam.gserviceaccount.com
     secrets:
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-      service_account: ${{ secrets.STG_SERVICE_ACCOUNT }}
-      workload_identity_provider: ${{ secrets.STG_W_IDENTITY_PROVIDER }}
-      project_id: ${{ secrets.STG_PROJECT_ID }}
-      registry_repo_name: ${{ secrets.STG_REGISTRY_REPO_NAME }}
+      SERVICE_ACCOUNT: ${{ secrets.STG_SERVICE_ACCOUNT }}
+      WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.STG_W_IDENTITY_PROVIDER }}
+      PROJECT_ID: ${{ secrets.STG_PROJECT_ID }}
+      REGISTRY_REPO_NAME: ${{ secrets.STG_REGISTRY_REPO_NAME }}
   deploy-api-to-google-cloud:
     uses: ./.github/workflows/stg-cloud-run.yml
     needs: [setup]
@@ -43,10 +43,10 @@ jobs:
       entrypoint_cmd: ""
     secrets:
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-      service_account: ${{ secrets.STG_SERVICE_ACCOUNT }}
-      workload_identity_provider: ${{ secrets.STG_W_IDENTITY_PROVIDER }}
-      project_id: ${{ secrets.STG_PROJECT_ID }}
-      registry_repo_name: ${{ secrets.STG_REGISTRY_REPO_NAME }}
+      SERVICE_ACCOUNT: ${{ secrets.STG_SERVICE_ACCOUNT }}
+      WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.STG_W_IDENTITY_PROVIDER }}
+      PROJECT_ID: ${{ secrets.STG_PROJECT_ID }}
+      REGISTRY_REPO_NAME: ${{ secrets.STG_REGISTRY_REPO_NAME }}
   deploy-webhook-to-google-cloud:
     uses: ./.github/workflows/stg-cloud-run.yml
     needs: [setup]
@@ -63,10 +63,10 @@ jobs:
       entrypoint_cmd: "" 
     secrets:
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-      service_account: ${{ secrets.STG_SERVICE_ACCOUNT }}
-      workload_identity_provider: ${{ secrets.STG_W_IDENTITY_PROVIDER }}
-      project_id: ${{ secrets.STG_PROJECT_ID }}
-      registry_repo_name: ${{ secrets.STG_REGISTRY_REPO_NAME }}
+      SERVICE_ACCOUNT: ${{ secrets.STG_SERVICE_ACCOUNT }}
+      WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.STG_W_IDENTITY_PROVIDER }}
+      PROJECT_ID: ${{ secrets.STG_PROJECT_ID }}
+      REGISTRY_REPO_NAME: ${{ secrets.STG_REGISTRY_REPO_NAME }}
   run-end-to-end-tests:
     if: false
     needs: [deploy-api-to-google-cloud, deploy-webhook-to-google-cloud]

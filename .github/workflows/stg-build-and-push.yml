@@ -5,18 +5,14 @@ on:
     secrets:
       SENTRY_DSN:
         required: false
-      project_id:
+      PROJECT_ID:
         required: true
-        type: string
-      workload_identity_provider:
+      WORKLOAD_IDENTITY_PROVIDER:
         required: true
-        type: string
-      registry_repo_name:
+      REGISTRY_REPO_NAME:
         required: true
-        type: string
-      service_account:
+      SERVICE_ACCOUNT:
         required: true
-        type: string
 
     inputs:
       branch_name:
@@ -40,7 +36,6 @@ env:
   GOOGLE_CLOUD_LOCATION: us-central1
   IMAGE_NAME: lending-portal-backend_${{ github.run_id }}
   GCR_REGISTRY: us-central1-docker.pkg.dev
-  GCR_REPOSITORY: ${{ secrets.project_id }}/${{ secrets.registry_repo_name }}
   K8S_NAMESPACE: lending-portal-staging
 
 jobs:
@@ -66,7 +61,7 @@ jobs:
 
       - name: Set environment variables
         run: |
-          echo "IMAGE=$GCR_REGISTRY/$GCR_REPOSITORY/$IMAGE_NAME:${{ inputs.branch_name }}" >> $GITHUB_ENV
+          echo "IMAGE=$GCR_REGISTRY/${{ secrets.PROJECT_ID }}/${{ secrets.REGISTRY_REPO_NAME }}/$IMAGE_NAME:${{ inputs.branch_name }}" >> $GITHUB_ENV
 
       - name: Check variables
         run: |
@@ -78,8 +73,8 @@ jobs:
         uses: 'google-github-actions/auth@v2'
         with:
           token_format: 'access_token'
-          workload_identity_provider: ${{ secrets.workload_identity_provider }} 
-          service_account: ${{ secrets.service_account }}
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }} 
+          service_account: ${{ secrets.SERVICE_ACCOUNT }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
