@@ -21,10 +21,10 @@ jobs:
       #frontend_base_path: "https://main.staging.planapp.com?apiRevision=${{github.head_ref||'main'}}"
       #backend_base_path: "https://api.staging.planapp.com/backend-staging/${{github.head_ref||'main'}}"
       #service_account: lending-portal-backend-s@plan-poc.iam.gserviceaccount.com
-      service_account: ${{ vars.STG_SERVICE_ACCOUNT }}
-      workload_identity_provider: ${{ vars.STG_W_IDENTITY_PROVIDER }}
-      project_id: ${{ vars.STG_PROJECT_ID }}
-      registry_repo_name: ${{ vars.STG_REGISTRY_REPO_NAME }}
+      service_account: ${{ secrets.STG_SERVICE_ACCOUNT }}
+      workload_identity_provider: ${{ secrets.STG_W_IDENTITY_PROVIDER }}
+      project_id: ${{ secrets.STG_PROJECT_ID }}
+      registry_repo_name: ${{ secrets.STG_REGISTRY_REPO_NAME }}
     secrets:
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
   deploy-api-to-google-cloud:
@@ -37,10 +37,10 @@ jobs:
       #frontend_base_path: "https://main.staging.planapp.com?apiRevision=${{github.head_ref||'main'}}"
       #backend_base_path: "https://api.staging.planapp.com/backend-staging/${{github.head_ref||'main'}}"
       #service_account: lending-portal-backend-s@plan-poc.iam.gserviceaccount.com
-      service_account: ${{ vars.STG_SERVICE_ACCOUNT }}
-      workload_identity_provider: ${{ vars.STG_W_IDENTITY_PROVIDER }}
-      project_id: ${{ vars.STG_PROJECT_ID }}
-      registry_repo_name: ${{ vars.STG_REGISTRY_REPO_NAME }}
+      service_account: ${{ secrets.STG_SERVICE_ACCOUNT }}
+      workload_identity_provider: ${{ secrets.STG_W_IDENTITY_PROVIDER }}
+      project_id: ${{ secrets.STG_PROJECT_ID }}
+      registry_repo_name: ${{ secrets.STG_REGISTRY_REPO_NAME }}
       max_instances: 1
       min_instances: 0
       deployment_name: backend
@@ -57,10 +57,10 @@ jobs:
       #frontend_base_path: "https://main.staging.planapp.com?apiRevision=${{github.head_ref||'main'}}"
       #backend_base_path: "https://api.staging.planapp.com/backend-staging/${{github.head_ref||'main'}}"
       #service_account: lending-portal-backend-s@plan-poc.iam.gserviceaccount.com
-      service_account: ${{ vars.STG_SERVICE_ACCOUNT }}
-      workload_identity_provider: ${{ vars.STG_W_IDENTITY_PROVIDER }}
-      project_id: ${{ vars.STG_PROJECT_ID }}
-      registry_repo_name: ${{ vars.STG_REGISTRY_REPO_NAME }}
+      service_account: ${{ secrets.STG_SERVICE_ACCOUNT }}
+      workload_identity_provider: ${{ secrets.STG_W_IDENTITY_PROVIDER }}
+      project_id: ${{ secrets.STG_PROJECT_ID }}
+      registry_repo_name: ${{ secrets.STG_REGISTRY_REPO_NAME }}
       max_instances: 3
       min_instances: 0
       deployment_name: backend-webhook
