@@ -5,6 +5,19 @@ on:
     secrets:
       SENTRY_DSN:
         required: false
+      project_id:
+        required: true
+        type: string
+      workload_identity_provider:
+        required: true
+        type: string
+      registry_repo_name:
+        required: true
+        type: string
+      service_account:
+        required: true
+        type: string
+
     inputs:
       memory_size:
         default: 0.5Gi
@@ -15,20 +28,8 @@ on:
       min_instances:
         default: 0
         type: string
-      service_account:
-        required: true
-        type: string
       branch_name:
         default: main
-        required: true
-        type: string
-      project_id:
-        required: true
-        type: string
-      workload_identity_provider:
-        required: true
-        type: string
-      registry_repo_name:
         required: true
         type: string
 
@@ -55,7 +56,7 @@ env:
   GOOGLE_CLOUD_LOCATION: us-central1
   IMAGE_NAME: lending-portal-backend_${{ github.run_id }}
   GCR_REGISTRY: us-central1-docker.pkg.dev
-  GCR_REPOSITORY: ${{ inputs.project_id }}/${{ inputs.registry_repo_name }}
+  GCR_REPOSITORY: ${{ secrets.project_id }}/${{ secrets.registry_repo_name }}
   K8S_NAMESPACE: lending-portal-staging
 
 jobs:
@@ -85,8 +86,8 @@ jobs:
         uses: 'google-github-actions/auth@v3'
         with:
           token_format: 'access_token'
-          workload_identity_provider: ${{ inputs.workload_identity_provider }}
-          service_account: ${{ inputs.service_account }}
+          workload_identity_provider: ${{ secrets.workload_identity_provider }}
+          service_account: ${{ secrets.service_account }}
 
       - id: deployToCloudRun
         name: Deploy to Cloud Run
@@ -99,7 +100,7 @@ jobs:
             --min-instances=${{ inputs.min_instances }} \
             --ingress=internal-and-cloud-load-balancing \
             --port=8080 \
-            --service-account=${{ inputs.service_account }} \
+            --service-account=${{ secrets.service_account }} \
             --tag=$REVISION \
             --timeout=1m40s \
             --env-vars-file=env/${{ inputs.env }}/new-env.yml \

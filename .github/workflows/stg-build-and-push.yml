@@ -5,10 +5,20 @@ on:
     secrets:
       SENTRY_DSN:
         required: false
-    inputs:
+      project_id:
+        required: true
+        type: string
+      workload_identity_provider:
+        required: true
+        type: string
+      registry_repo_name:
+        required: true
+        type: string
       service_account:
         required: true
         type: string
+
+    inputs:
       branch_name:
         default: main
         required: true
@@ -25,21 +35,12 @@ on:
       backend_base_path:
         required: false
         type: string
-      project_id:
-        required: true
-        type: string
-      workload_identity_provider:
-        required: true
-        type: string
-      registry_repo_name:
-        required: true
-        type: string
 
 env:
   GOOGLE_CLOUD_LOCATION: us-central1
   IMAGE_NAME: lending-portal-backend_${{ github.run_id }}
   GCR_REGISTRY: us-central1-docker.pkg.dev
-  GCR_REPOSITORY: ${{ inputs.project_id }}/${{ inputs.registry_repo_name }}
+  GCR_REPOSITORY: ${{ secrets.project_id }}/${{ secrets.registry_repo_name }}
   K8S_NAMESPACE: lending-portal-staging
 
 jobs:
@@ -77,8 +78,8 @@ jobs:
         uses: 'google-github-actions/auth@v2'
         with:
           token_format: 'access_token'
-          workload_identity_provider: ${{ inputs.workload_identity_provider }} 
-          service_account: ${{ inputs.service_account }}
+          workload_identity_provider: ${{ secrets.workload_identity_provider }} 
+          service_account: ${{ secrets.service_account }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3

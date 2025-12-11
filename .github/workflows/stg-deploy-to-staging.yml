@@ -21,12 +21,12 @@ jobs:
       #frontend_base_path: "https://main.staging.planapp.com?apiRevision=${{github.head_ref||'main'}}"
       #backend_base_path: "https://api.staging.planapp.com/backend-staging/${{github.head_ref||'main'}}"
       #service_account: lending-portal-backend-s@plan-poc.iam.gserviceaccount.com
+    secrets:
+      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
       service_account: ${{ secrets.STG_SERVICE_ACCOUNT }}
       workload_identity_provider: ${{ secrets.STG_W_IDENTITY_PROVIDER }}
       project_id: ${{ secrets.STG_PROJECT_ID }}
       registry_repo_name: ${{ secrets.STG_REGISTRY_REPO_NAME }}
-    secrets:
-      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
   deploy-api-to-google-cloud:
     uses: ./.github/workflows/stg-cloud-run.yml
     needs: [setup]
@@ -37,16 +37,16 @@ jobs:
       #frontend_base_path: "https://main.staging.planapp.com?apiRevision=${{github.head_ref||'main'}}"
       #backend_base_path: "https://api.staging.planapp.com/backend-staging/${{github.head_ref||'main'}}"
       #service_account: lending-portal-backend-s@plan-poc.iam.gserviceaccount.com
-      service_account: ${{ secrets.STG_SERVICE_ACCOUNT }}
-      workload_identity_provider: ${{ secrets.STG_W_IDENTITY_PROVIDER }}
-      project_id: ${{ secrets.STG_PROJECT_ID }}
-      registry_repo_name: ${{ secrets.STG_REGISTRY_REPO_NAME }}
       max_instances: 1
       min_instances: 0
       deployment_name: backend
       entrypoint_cmd: ""
     secrets:
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+      service_account: ${{ secrets.STG_SERVICE_ACCOUNT }}
+      workload_identity_provider: ${{ secrets.STG_W_IDENTITY_PROVIDER }}
+      project_id: ${{ secrets.STG_PROJECT_ID }}
+      registry_repo_name: ${{ secrets.STG_REGISTRY_REPO_NAME }}
   deploy-webhook-to-google-cloud:
     uses: ./.github/workflows/stg-cloud-run.yml
     needs: [setup]
@@ -57,16 +57,16 @@ jobs:
       #frontend_base_path: "https://main.staging.planapp.com?apiRevision=${{github.head_ref||'main'}}"
       #backend_base_path: "https://api.staging.planapp.com/backend-staging/${{github.head_ref||'main'}}"
       #service_account: lending-portal-backend-s@plan-poc.iam.gserviceaccount.com
-      service_account: ${{ secrets.STG_SERVICE_ACCOUNT }}
-      workload_identity_provider: ${{ secrets.STG_W_IDENTITY_PROVIDER }}
-      project_id: ${{ secrets.STG_PROJECT_ID }}
-      registry_repo_name: ${{ secrets.STG_REGISTRY_REPO_NAME }}
       max_instances: 3
       min_instances: 0
       deployment_name: backend-webhook
       entrypoint_cmd: "" 
     secrets:
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+      service_account: ${{ secrets.STG_SERVICE_ACCOUNT }}
+      workload_identity_provider: ${{ secrets.STG_W_IDENTITY_PROVIDER }}
+      project_id: ${{ secrets.STG_PROJECT_ID }}
+      registry_repo_name: ${{ secrets.STG_REGISTRY_REPO_NAME }}
   run-end-to-end-tests:
     if: false
     needs: [deploy-api-to-google-cloud, deploy-webhook-to-google-cloud]
